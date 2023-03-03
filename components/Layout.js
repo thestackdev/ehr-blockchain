@@ -1,14 +1,13 @@
-import React, { Component } from "react";
 import { createMedia } from "@artsy/fresnel";
-import PropTypes from "prop-types";
 import Head from "next/head";
-import { Link } from "../routes";
+import Link from "next/link";
+import React, { Component } from "react";
 import {
-  Container,
-  Visibility,
-  Segment,
-  Menu,
   Button,
+  Container,
+  Menu,
+  Segment,
+  Visibility,
 } from "semantic-ui-react";
 
 const { MediaContextProvider, Media } = createMedia({
@@ -55,22 +54,22 @@ class Layout extends Component {
               size="large"
             >
               <Container>
-                <Link route="/">
+                <Link href="/" legacyBehavior>
                   <Menu.Item as="a">Home</Menu.Item>
                 </Link>
-                <Link route="/all">
+                <Link href="/all" legacyBehavior>
                   <Menu.Item as="a">Records</Menu.Item>
                 </Link>
-                <Link route="/viewdoctors">
+                <Link href="/viewdoctors" legacyBehavior>
                   <Menu.Item as="a">Doctors</Menu.Item>
                 </Link>
                 <Menu.Item position="right">
-                  <Link route="/doctors">
+                  <Link href="/doctors" legacyBehavior>
                     <Button as="a" inverted={!fixed}>
                       Create
                     </Button>
                   </Link>
-                  <Link route="/newdoc">
+                  <Link href="/newdoc" legacyBehavior>
                     <Button
                       as="a"
                       inverted={!fixed}

@@ -1,6 +1,7 @@
 import { createMedia } from "@artsy/fresnel";
+import Link from "next/link";
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
   Container,
@@ -8,12 +9,11 @@ import {
   Header,
   Icon,
   Image,
-  List,
   Menu,
   Segment,
   Visibility,
 } from "semantic-ui-react";
-import { Link } from "../routes";
+import { TransactionContext } from "../context/Entherum";
 
 const { MediaContextProvider, Media } = createMedia({
   breakpoints: {
@@ -52,7 +52,7 @@ const HomepageHeading = ({ mobile }) => (
         marginTop: mobile ? "0.5em" : "1.5em",
       }}
     />
-    <Link route="/all">
+    <Link href="/all" legacyBehavior>
       <Button primary size="huge">
         Get Started
         <Icon name="right arrow" />
@@ -64,73 +64,68 @@ const HomepageHeading = ({ mobile }) => (
 HomepageHeading.propTypes = {
   mobile: PropTypes.bool,
 };
-class DesktopContainer extends Component {
-  state = {};
 
-  hideFixedMenu = () => this.setState({ fixed: false });
-  showFixedMenu = () => this.setState({ fixed: true });
+function DesktopContainer({ children }) {
+  const [fixed, setFixed] = useState(false);
 
-  render() {
-    const { children } = this.props;
-    const { fixed } = this.state;
+  const hideFixedMenu = () => setFixed(false);
+  const showFixedMenu = () => setFixed(true);
 
-    return (
-      <Media greaterThan="mobile">
-        <Visibility
-          once={false}
-          onBottomPassed={this.showFixedMenu}
-          onBottomPassedReverse={this.hideFixedMenu}
+  return (
+    <Media greaterThan="mobile">
+      <Visibility
+        once={false}
+        onBottomPassed={showFixedMenu}
+        onBottomPassedReverse={hideFixedMenu}
+      >
+        <Segment
+          inverted
+          textAlign="center"
+          style={{ minHeight: 700, padding: "1em 0em" }}
+          vertical
         >
-          <Segment
-            inverted
-            textAlign="center"
-            style={{ minHeight: 700, padding: "1em 0em" }}
-            vertical
+          <Menu
+            fixed={fixed ? "top" : null}
+            inverted={!fixed}
+            pointing={!fixed}
+            secondary={!fixed}
+            size="large"
           >
-            <Menu
-              fixed={fixed ? "top" : null}
-              inverted={!fixed}
-              pointing={!fixed}
-              secondary={!fixed}
-              size="large"
-            >
-              <Container>
-                <Link route="/">
-                  <Menu.Item as="a">Home</Menu.Item>
+            <Container>
+              <Link href="/" legacyBehavior>
+                <Menu.Item as="a">Home</Menu.Item>
+              </Link>
+              <Link href="/all" legacyBehavior>
+                <Menu.Item as="a">Records</Menu.Item>
+              </Link>
+              <Link href="/viewdoctors" legacyBehavior>
+                <Menu.Item as="a">Doctors</Menu.Item>
+              </Link>
+              <Menu.Item position="right">
+                <Link href="/Records/docs" legacyBehavior>
+                  <Button as="a" inverted={!fixed}>
+                    Create
+                  </Button>
                 </Link>
-                <Link route="/all">
-                  <Menu.Item as="a">Records</Menu.Item>
+                <Link href="/newdoc" legacyBehavior>
+                  <Button
+                    inverted={!fixed}
+                    primary={fixed}
+                    style={{ marginLeft: "0.5em" }}
+                  >
+                    Register Doctor
+                  </Button>
                 </Link>
-                <Link route="/viewdoctors">
-                  <Menu.Item as="a">Doctors</Menu.Item>
-                </Link>
-                <Menu.Item position="right">
-                  <Link route="/Records/docs">
-                    <Button as="a" inverted={!fixed}>
-                      Create
-                    </Button>
-                  </Link>
-                  <Link route="/newdoc">
-                    <Button
-                      as="a"
-                      inverted={!fixed}
-                      primary={fixed}
-                      style={{ marginLeft: "0.5em" }}
-                    >
-                      Register Doctor
-                    </Button>
-                  </Link>
-                </Menu.Item>
-              </Container>
-            </Menu>
-            <HomepageHeading />
-          </Segment>
-        </Visibility>
+              </Menu.Item>
+            </Container>
+          </Menu>
+          <HomepageHeading />
+        </Segment>
+      </Visibility>
 
-        {children}
-      </Media>
-    );
-  }
+      {children}
+    </Media>
+  );
 }
 
 DesktopContainer.propTypes = {
@@ -181,10 +176,11 @@ const HomepageLayout = () => (
         </Grid.Row>
         <Grid.Row>
           <Grid.Column textAlign="center">
-            <Link href="https://blockgeni.com/electronic-health-records-ehr-on-blockchain/">
-              <a>
-                <Button size="huge">Read More</Button>
-              </a>
+            <Link
+              href="https://blockgeni.com/electronic-health-records-ehr-on-blockchain/"
+              legacyBehavior
+            >
+              <Button size="huge">Read More</Button>
             </Link>
           </Grid.Column>
         </Grid.Row>
@@ -213,7 +209,6 @@ const HomepageLayout = () => (
         </Button>
       </Container>
     </Segment>
-
     <Segment inverted vertical style={{ padding: "5em 0em" }}></Segment>
   </ResponsiveContainer>
 );

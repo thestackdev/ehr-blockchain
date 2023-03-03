@@ -1,52 +1,43 @@
-import React from "react";
-import factory from "../ethereum/factory";
+import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
+import { Card, Icon } from "semantic-ui-react";
 import Layout from "../components/Layout";
-import web3 from "../ethereum/web3";
-import { Component } from "react";
-import { Card, Icon, Image } from "semantic-ui-react";
-import { Link } from "../routes";
+import { TransactionContext } from "../context/Entherum";
 
-class doctor extends Component {
-  state = {
-    accounts: [],
-    items: [],
-  };
-  async componentDidMount() {
-    const accounts = await web3.eth.getAccounts();
-    const docs = await factory.methods.getDoctors().call({ from: accounts[0] });
+export default function Doctor() {
+  const [items, setItems] = useState([]);
+  const { getDoctors, getDoctor } = useContext(TransactionContext);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const docs = await getDoctors();
     console.log(docs);
-    const items = [];
     for (var i = 0; i < docs.length; i += 1) {
-      const eachRecord = await factory.methods.docs(docs[i]).call();
-      items.push({
-        image: eachRecord.imageHash,
-        header: eachRecord.description,
-        description: eachRecord.speciality,
-        extra: (
-          <Link route={`/doctors/${eachRecord.doc}`}>
-            <a>
+      const eachRecord = await getDoctor(docs[i]);
+      setItems((e) => [
+        ...e,
+        {
+          image: eachRecord.imageHash,
+          header: eachRecord.description,
+          description: eachRecord.speciality,
+          extra: (
+            <Link href={`/doctors/${eachRecord.doc}`}>
               <Icon name="user" />
               Select
-            </a>
-          </Link>
-        ),
-      });
+            </Link>
+          ),
+        },
+      ]);
     }
-
-    this.setState({ items });
-  }
-  renderDoctors = () => {
-    console.log(this.state.items);
-    return <Card.Group itemsPerRow={6} items={this.state.items} />;
   };
-  render() {
-    return (
-      <Layout>
-        <h3>Select your doctors</h3>
-        {this.renderDoctors()}
-      </Layout>
-    );
-  }
-}
 
-export default doctor;
+  return (
+    <Layout>
+      <h3>Select your doctors</h3>
+      <Card.Group itemsPerRow={6} items={items} />
+    </Layout>
+  );
+}

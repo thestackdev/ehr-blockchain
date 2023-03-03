@@ -1,57 +1,46 @@
-import React, { Component } from "react";
-import { Button, Card, Icon } from "semantic-ui-react";
-import factory from "../ethereum/factory";
+import Link from "next/link";
+import React, { useContext, useEffect, useState } from "react";
+import { Card, Icon } from "semantic-ui-react";
 import Layout from "../components/Layout";
-import web3 from "../ethereum/web3";
-import Record from "../ethereum/record";
-import { Link } from "../routes";
-class recordIndex extends Component {
-  state = {
-    items: [],
-  };
-  static async getInitialProps() {
-    const records = await factory.methods.getDeployedRecords().call();
-    return { records };
-  }
-  async componentDidMount() {
-    const accounts = await web3.eth.getAccounts();
-    const items = [];
-    console.log(this.props.records.length);
-    for (var i = 0; i < this.props.records.length; i++) {
-      const recordInstance = Record(this.props.records[i]);
-      console.log(recordInstance.options.address);
-      const eachRecord = await recordInstance.methods
-        .getNameandAddress()
-        .call({ from: accounts[0] });
-      items.push({
-        image: eachRecord[1],
-        header: eachRecord[0],
-        description: eachRecord[2],
-        fluid: true,
-        extra: (
-          <Link route={`/Records/${this.props.records[i]}`}>
-            <a>
+import { TransactionContext } from "../context/Entherum";
+
+export default function Records() {
+  const { getAllRecords, getNameAndAddress } = useContext(TransactionContext);
+  const [records, setRecords] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const data = await getAllRecords();
+    for (let i = 0; i < data.length; i++) {
+      const recordInstance = await getNameAndAddress(data[i]);
+      console.log(recordInstance);
+      setRecords((e) => [
+        ...e,
+        {
+          image: recordInstance[1],
+          header: recordInstance[0],
+          description: recordInstance[2],
+          fluid: true,
+          extra: (
+            <Link href={`/records/${data[i]}`}>
               <Icon name="user" />
               View
-            </a>
-          </Link>
-        ),
-      });
+            </Link>
+          ),
+        },
+      ]);
     }
-    this.setState({ items });
-  }
-  renderRecords() {
-    return <Card.Group items={this.state.items} itemsPerRow={2} />;
-  }
+  };
 
-  render() {
-    return (
-      <Layout>
-        <h1>All records!!</h1>
-        {this.renderRecords()}
-      </Layout>
-    );
-  }
+  console.log(records.length);
+
+  return (
+    <Layout>
+      <h1>All records!!</h1>
+      <Card.Group items={records} itemsPerRow={2} />
+    </Layout>
+  );
 }
-
-export default recordIndex;
