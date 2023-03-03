@@ -10,14 +10,15 @@ import {
   Label,
   Segment,
 } from "semantic-ui-react";
-import Layout from "../../../components/Layout";
-import { TransactionContext } from "../../../context/Entherum";
+import Layout from "../../components/Layout";
+import { TransactionContext } from "../../context/Entherum";
 
 export default function ShowRecord() {
   const router = useRouter();
+
   const {
     currentAccount,
-    getNameandAddress,
+    getNameAndAddress,
     getDoctor,
     getDetails,
     getPrescriptionLength,
@@ -31,32 +32,35 @@ export default function ShowRecord() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!router.isReady) return;
     fetchData();
-  }, []);
+  }, [router.isReady]);
 
   const fetchData = async () => {
     const recordAddress = router.query.address;
-    console.log(router.query);
-    const NameAndImage = await getNameandAddress(router.query.address);
+
+    const NameAndImage = await getNameAndAddress(recordAddress);
 
     if (
       currentAccount != NameAndImage[2] &&
       currentAccount != NameAndImage[3]
     ) {
-      setMessage("NA");
+      //   setMessage("NA");
+      //   setLoading(false);
+      //   return;
     }
 
     const doctor = await getDoctor(NameAndImage[3]);
 
-    const details = await getDetails();
+    const details = await getDetails(recordAddress);
 
-    const prescriptionlength = await getPrescriptionLength();
-    const reportLength = await getReportLength();
+    const prescriptionlength = await getPrescriptionLength(recordAddress);
+    const reportLength = await getReportLength(recordAddress);
 
     const prescriptions = [];
 
     for (let i = 0; i < prescriptionlength; i++) {
-      const prescriptionlink = await getPrescription(i);
+      const prescriptionlink = await getPrescription(recordAddress, i);
       prescriptions.push(
         <p>
           <Link href={prescriptionlink}>
@@ -73,7 +77,7 @@ export default function ShowRecord() {
 
     const reports = [];
     for (let i = 0; i < reportLength; i++) {
-      const reportLink = await getReport(i);
+      const reportLink = await getReport(recordAddress, i);
       reports.push(
         <p>
           <Link href={reportLink}>
@@ -101,7 +105,7 @@ export default function ShowRecord() {
 
   if (loading) return <span>Loading...</span>;
 
-  if (this.props.message == "NA") {
+  if (message == "NA") {
     return (
       <Layout>
         <h1>You cant access this profile</h1>
@@ -118,15 +122,14 @@ export default function ShowRecord() {
               Overview
             </Label>
             <span>Name and profile image</span>
-            <h3>{this.props.NameAndImage[0]}</h3>
-
+            <h3>{state.NameAndImage[0]}</h3>
             <Image
               style={{
                 maxWidth: "150px",
                 maxHeight: "150px",
                 display: "block",
               }}
-              src={this.props.NameAndImage[1]}
+              src={state.NameAndImage[1]}
             />
             <p></p>
             <Label as="a" color="blue" ribbon>
@@ -134,26 +137,26 @@ export default function ShowRecord() {
             </Label>
             <span>your details</span>
             <p></p>
-            <p>Age: {this.props.details[1]}</p>
-            <p>height: {this.props.details[2]}</p>
-            <p>weight: {this.props.details[3]}</p>
-            <p>gender: {this.props.details[4]}</p>
+            <p>Age: {state.details[1]}</p>
+            <p>height: {state.details[2]}</p>
+            <p>weight: {state.details[3]}</p>
+            <p>gender: {state.details[4]}</p>
             <Label as="a" color="orange" ribbon>
               prescription links
             </Label>
             <p></p>
-            <p>{this.props.prescriptions}</p>
+            <p>{state.prescriptions}</p>
             <Label as="a" color="teal" ribbon>
               report links
             </Label>
             <p></p>
-            <p>{this.props.reports}</p>
+            <p>{state.reports}</p>
             <Label as="a" color="pink" ribbon>
               your doctor
             </Label>
             <Card>
               <Image
-                src={this.props.doctor.imageHash}
+                src={state.doctor.imageHash}
                 style={{
                   maxWidth: "150px",
                   maxHeight: "150px",
@@ -161,23 +164,19 @@ export default function ShowRecord() {
                 }}
               />
               <Card.Content>
-                <Card.Header content={this.props.doctor.description} />
-                <Card.Description content={this.props.doctor.speciality} />
+                <Card.Header content={state.doctor.description} />
+                <Card.Description content={state.doctor.speciality} />
               </Card.Content>
             </Card>
           </Segment>
         </Grid.Column>
       </Grid>
       {currentAccount == state.NameAndImage[3] && (
-        <Link
-          route={`/records/${state.recordAddress}/${state.NameAndImage[3]}`}
-        >
-          <a>
-            <Button primary>
-              <Icon name="add circle" />
-              add prescription or report
-            </Button>
-          </a>
+        <Link href={`/records/${state.recordAddress}/${state.NameAndImage[3]}`}>
+          <Button primary>
+            <Icon name="add circle" />
+            add prescription or report
+          </Button>
         </Link>
       )}
     </Layout>

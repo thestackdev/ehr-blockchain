@@ -106,7 +106,8 @@ export default function CreateRecord() {
         doctorAddress,
         resultPrescriptionLink,
         resultReportLink,
-        imageLink: "https://ipfs.infura.io/ipfs/",
+        imageLink:
+          "https://w7.pngwing.com/pngs/415/182/png-transparent-national-health-service-general-practitioner-physician-junior-doctor-patient-doctor-female-doctor-illustration-service-people-dentistry.png",
       });
       router.push("/all");
     } catch (err) {

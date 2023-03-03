@@ -120,6 +120,86 @@ export const TransactionsProvider = ({ children }) => {
     setIsLoading(false);
   };
 
+  const getDetails = async (address) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.getDetails();
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  const getPrescriptionLength = async (address) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.getPrescriptionLength();
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  const getReportLength = async (address) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.getReportLength();
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  const getPrescription = async (address, index) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.getPrescription(index);
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  const getReport = async (address, index) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.getReport(index);
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
   const createRecord = async (data) => {
     setIsLoading(true);
     try {
@@ -158,7 +238,7 @@ export const TransactionsProvider = ({ children }) => {
           data.speciality,
           data.name
         );
-
+        await doctor.await();
         return doctor;
       } else {
         console.log("Ethereum is not present");
@@ -224,6 +304,11 @@ export const TransactionsProvider = ({ children }) => {
         createRecord,
         getAllRecords,
         getNameAndAddress,
+        getDetails,
+        getPrescriptionLength,
+        getReportLength,
+        getPrescription,
+        getReport,
       }}
     >
       {children}
