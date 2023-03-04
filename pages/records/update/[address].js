@@ -2,9 +2,9 @@ import { create } from "ipfs-http-client";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useContext } from "react";
 import { Button, Form, Message } from "semantic-ui-react";
-import Layout from "../../components/Layout";
-import { TransactionContext } from "../../context/Entherum";
-import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from "../../utils/constants";
+import Layout from "../../../components/Layout";
+import { TransactionContext } from "../../../context/Entherum";
+import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from "../../../utils/constants";
 
 const ipfs = create({
   host: IPFS_BASE,
@@ -12,12 +12,11 @@ const ipfs = create({
   protocol: IPFS_PROTOCOL,
 });
 
-export default function AddRecord(props) {
+export default function AddRecord() {
   const router = useRouter();
   const {
     setReportHash,
-    setPrescriptionHash
-    , currentAccount
+    setPrescriptionHash, currentAccount
   } = useContext(TransactionContext);
 
   const [state, setState] = useState({
@@ -55,12 +54,13 @@ export default function AddRecord(props) {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    this.setState({
+    setState((e) => ({
+      ...e,
       loading: true,
       message: "Your files are being added to ipfs",
       errorMessage: "",
       visible: false,
-    });
+    }));
     try {
       let resultPrescription = null;
       let resultReport = null;
@@ -71,24 +71,24 @@ export default function AddRecord(props) {
       setState((e) => ({ ...e, message: "added your files pushing to blockchain" }));
       if (resultPrescription != null) {
         const link = IPFS_GATEWAY + resultPrescription.path;
-        await setPrescriptionHash(router.query.address, currentAccount, link)
+        await setPrescriptionHash(router.query.address, link)
       }
       if (resultReport != null) {
         const link = IPFS_GATEWAY + resultReport.path;
         await
-          setReportHash(router.query.address, currentAccount, link)
+          setReportHash(router.query.address, link)
       }
     } catch (error) {
-      this.setState({ errorMessage: error.message });
+      setState((e) => ({ ...e, errorMessage: error.message }));
     }
-    this.setState({ loading: false, message: "succefully done Thank you!!" });
+    setState((e) => ({ ...e, loading: false, message: "succefully done Thank you!!" }));
     router.push(`/records/${router.query.address}`);
   };
 
   return (
     <Layout>
       <h3>add files</h3>
-      <Form error={!!this.state.errorMessage} onSubmit={onSubmit}>
+      <Form error={!!state.errorMessage} onSubmit={onSubmit}>
         <Form.Input
           type="file"
           label="prescription(if any)"
@@ -113,3 +113,4 @@ export default function AddRecord(props) {
     </Layout>
   );
 }
+

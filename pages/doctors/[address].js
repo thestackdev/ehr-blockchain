@@ -1,8 +1,18 @@
+import { create } from "ipfs-http-client";
 import { useRouter } from "next/router";
 import React, { useContext, useState } from "react";
 import { Button, Form, Message } from "semantic-ui-react";
 import Layout from "../../components/Layout";
 import { TransactionContext } from "../../context/Entherum";
+import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from "../../utils/constants";
+
+const ipfs = create({
+  host: IPFS_BASE,
+  port: IPFS_PORT,
+  protocol:
+    IPFS_PROTOCOL,
+});
+
 
 const options = [
   { key: "m", text: "Male", value: "male" },
@@ -15,10 +25,8 @@ export default function CreateRecord() {
   const router = useRouter();
   const [state, setState] = useState({
     name: "",
-    bufferReport:
-      "https://w7.pngwing.com/pngs/415/182/png-transparent-national-health-service-general-practitioner-physician-junior-doctor-patient-doctor-female-doctor-illustration-service-people-dentistry.png",
-    bufferPrescription:
-      "https://w7.pngwing.com/pngs/415/182/png-transparent-national-health-service-general-practitioner-physician-junior-doctor-patient-doctor-female-doctor-illustration-service-people-dentistry.png",
+    bufferReport: null,
+    bufferPrescription: null,
     account: null,
     errorMessage: "",
     loading: false,
@@ -26,44 +34,43 @@ export default function CreateRecord() {
     gender: "",
     height: "",
     weight: "",
-    imageHash:
-      "https://w7.pngwing.com/pngs/415/182/png-transparent-national-health-service-general-practitioner-physician-junior-doctor-patient-doctor-female-doctor-illustration-service-people-dentistry.png",
+    imageHash: null,
     doctorAddress: router.query.address,
     message: "",
     visible: true,
   });
 
   const captureFilePrescription = (event) => {
-    // event.preventDefault();
-    // const file = event.target.files[0];
-    // const reader = new window.FileReader();
-    // reader.readAsArrayBuffer(file);
-    // reader.onloadend = () => {
-    //   this.setState({ bufferPrescription: Buffer(reader.result) });
-    //   console.log("bufferPrescription", this.state.bufferPrescription);
-    // };
+    event.preventDefault();
+    const file = event.target.files[0];
+    const reader = new window.FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = () => {
+      setState((e) => ({ ...e, bufferPrescription: Buffer(reader.result) }));
+      console.log("bufferPrescription", state.bufferPrescription);
+    };
   };
 
   const captureFileReport = (event) => {
-    // event.preventDefault();
-    // const file = event.target.files[0];
-    // const reader = new window.FileReader();
-    // reader.readAsArrayBuffer(file);
-    // reader.onloadend = () => {
-    //   this.setState({ bufferReport: Buffer(reader.result) });
-    //   console.log("bufferReport", this.state.bufferReport);
-    // };
+    event.preventDefault();
+    const file = event.target.files[0];
+    const reader = new window.FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = () => {
+      setState((e) => ({ ...e, bufferReport: Buffer(reader.result) }));
+      console.log("bufferReport", state.bufferReport);
+    };
   };
 
   const captureFileImage = (event) => {
-    // event.preventDefault();
-    // const file = event.target.files[0];
-    // const reader = new window.FileReader();
-    // reader.readAsArrayBuffer(file);
-    // reader.onloadend = () => {
-    //   this.setState({ imageHash: Buffer(reader.result) });
-    //   console.log("imageHash", this.state.imageHash);
-    // };
+    event.preventDefault();
+    const file = event.target.files[0];
+    const reader = new window.FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = () => {
+      setState((e) => ({ ...e, imageHash: Buffer(reader.result) }));
+      console.log("imageHash", state.imageHash);
+    };
   };
 
   const onSubmit = async (event) => {
@@ -79,19 +86,19 @@ export default function CreateRecord() {
 
     try {
       let resultPrescriptionLink = "";
-      // if (state.bufferPrescription != null) {
-      //   const resultPrescription = await ipfs.add(
-      //     state.bufferPrescription
-      //   );
-      //   resultPrescriptionLink =
-      //     "https://ipfs.infura.io/ipfs/" + resultPrescription.path;
-      // }
+      if (state.bufferPrescription != null) {
+        const resultPrescription = await ipfs.add(
+          state.bufferPrescription
+        );
+        resultPrescriptionLink =
+          IPFS_GATEWAY + resultPrescription.path;
+      }
       let resultReportLink = "";
-      // if (state.bufferReport != null) {
-      //   const resultReport = await ipfs.add(state.bufferReport);
-      //   resultReportLink = "https://ipfs.infura.io/ipfs/" + resultReport.path;
-      // }
-      // const imageHash = await ipfs.add(state.imageHash);
+      if (state.bufferReport != null) {
+        const resultReport = await ipfs.add(state.bufferReport);
+        resultReportLink = IPFS_GATEWAY + resultReport.path;
+      }
+      const imageHash = await ipfs.add(state.imageHash);
       setState((e) => ({
         ...e,
         message: "added your files, creating your record",
@@ -106,8 +113,7 @@ export default function CreateRecord() {
         doctorAddress,
         resultPrescriptionLink,
         resultReportLink,
-        imageLink:
-          "https://w7.pngwing.com/pngs/415/182/png-transparent-national-health-service-general-practitioner-physician-junior-doctor-patient-doctor-female-doctor-illustration-service-people-dentistry.png",
+        imageLink: IPFS_GATEWAY + imageHash.path,
       });
       router.push("/all");
     } catch (err) {

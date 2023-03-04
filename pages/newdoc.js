@@ -4,11 +4,12 @@ import React, { useContext, useState } from "react";
 import { Button, Form, Icon, Message } from "semantic-ui-react";
 import Layout from "../components/Layout";
 import { TransactionContext } from "../context/Entherum";
-
+import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from '../utils/constants'
 const ipfs = create({
-  host: "ipfs.infura.io",
-  port: 5001,
-  protocol: "https",
+  host: IPFS_BASE,
+  port: IPFS_PORT,
+  protocol:
+    IPFS_PROTOCOL,
 });
 
 export default function Create() {
@@ -38,9 +39,8 @@ export default function Create() {
   const onSubmit = async (event) => {
     event.preventDefault();
     try {
-      // const result = await ipfs.add(state.buffer);
-      const imagelink =
-        "https://w7.pngwing.com/pngs/415/182/png-transparent-national-health-service-general-practitioner-physician-junior-doctor-patient-doctor-female-doctor-illustration-service-people-dentistry.png";
+      const result = await ipfs.add(state.buffer);
+      const imagelink = IPFS_GATEWAY + result.path;
       await registerDoctor({
         address: state.address,
         imagelink: imagelink,

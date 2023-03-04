@@ -200,6 +200,41 @@ export const TransactionsProvider = ({ children }) => {
     setIsLoading(false);
   };
 
+  const setPrescriptionHash = async (address, hash) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.setPrescriptionHash(currentAccount, hash);
+        await details.wait();
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+
+  const setReportHash = async (address, hash) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const details = await healthRecordContract.setreportHash(currentAccount, hash);
+        return details;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+
   const createRecord = async (data) => {
     setIsLoading(true);
     try {
@@ -238,7 +273,7 @@ export const TransactionsProvider = ({ children }) => {
           data.speciality,
           data.name
         );
-        await doctor.await();
+        await doctor.wait();
         return doctor;
       } else {
         console.log("Ethereum is not present");
@@ -255,10 +290,11 @@ export const TransactionsProvider = ({ children }) => {
       if (!ethereum) return alert("Please install MetaMask.");
 
       const accounts = await ethereum.request({ method: "eth_accounts" });
-
+      console.log(accounts);
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
       } else {
+        connectWallet();
         console.log("No accounts found");
       }
     } catch (error) {
@@ -309,6 +345,8 @@ export const TransactionsProvider = ({ children }) => {
         getReportLength,
         getPrescription,
         getReport,
+        setReportHash,
+        setPrescriptionHash,
       }}
     >
       {children}

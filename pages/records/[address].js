@@ -40,14 +40,13 @@ export default function ShowRecord() {
     const recordAddress = router.query.address;
 
     const NameAndImage = await getNameAndAddress(recordAddress);
-
     if (
-      currentAccount != NameAndImage[2] &&
-      currentAccount != NameAndImage[3]
+      currentAccount.toLowerCase() != NameAndImage[2].toLowerCase() &&
+      currentAccount.toLowerCase() != NameAndImage[3].toLowerCase()
     ) {
-      //   setMessage("NA");
-      //   setLoading(false);
-      //   return;
+      setMessage("NA");
+      setLoading(false);
+      return;
     }
 
     const doctor = await getDoctor(NameAndImage[3]);
@@ -62,16 +61,10 @@ export default function ShowRecord() {
     for (let i = 0; i < prescriptionlength; i++) {
       const prescriptionlink = await getPrescription(recordAddress, i);
       prescriptions.push(
-        <p>
-          <Link href={prescriptionlink}>
-            <a target="_blank">
-              <Button>
-                <Icon name="file alternate outline" />
-                prescription {i + 1}
-              </Button>
-            </a>
-          </Link>
-        </p>
+        <Link href={prescriptionlink}>
+          <Icon name="file alternate outline" />
+          prescription {i + 1}
+        </Link>
       );
     }
 
@@ -79,16 +72,10 @@ export default function ShowRecord() {
     for (let i = 0; i < reportLength; i++) {
       const reportLink = await getReport(recordAddress, i);
       reports.push(
-        <p>
-          <Link href={reportLink}>
-            <a target="_blank">
-              <Button>
-                <Icon name="file alternate outline" />
-                report {i + 1}
-              </Button>
-            </a>
-          </Link>
-        </p>
+        <Link href={reportLink}>
+          <Icon name="file alternate outline" />
+          report {i + 1}
+        </Link>
       );
     }
     setState({
@@ -171,13 +158,11 @@ export default function ShowRecord() {
           </Segment>
         </Grid.Column>
       </Grid>
-      {currentAccount == state.NameAndImage[3] && (
-        <Link href={`/records/${state.recordAddress}/${state.NameAndImage[3]}`}>
-          <Button primary>
-            <Icon name="add circle" />
-            add prescription or report
-          </Button>
-        </Link>
+      {currentAccount.toLowerCase() == state.NameAndImage[3].toLowerCase() && (
+        <Button primary onClick={() => router.push(`/records/update/${state.recordAddress}`)}>
+          <Icon name="add circle" />
+          Add prescription or report
+        </Button>
       )}
     </Layout>
   );
