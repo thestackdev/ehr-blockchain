@@ -1,7 +1,7 @@
 import { createMedia } from "@artsy/fresnel";
 import Link from "next/link";
 import PropTypes from "prop-types";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Button,
   Container,
@@ -22,6 +22,7 @@ const { MediaContextProvider, Media } = createMedia({
     computer: 1024,
   },
 });
+
 const HomepageHeading = ({ mobile }) => (
   <Container text>
     <link
@@ -52,7 +53,7 @@ const HomepageHeading = ({ mobile }) => (
         marginTop: mobile ? "0.5em" : "1.5em",
       }}
     />
-    <Link href="/all" legacyBehavior>
+    <Link href="/doctors" legacyBehavior>
       <Button primary size="huge">
         Get Started
         <Icon name="right arrow" />
@@ -70,6 +71,8 @@ function DesktopContainer({ children }) {
 
   const hideFixedMenu = () => setFixed(false);
   const showFixedMenu = () => setFixed(true);
+
+  const { manager, currentAccount } = useContext(TransactionContext);
 
   return (
     <Media greaterThan="mobile">
@@ -96,33 +99,34 @@ function DesktopContainer({ children }) {
                 <Menu.Item as="a">Home</Menu.Item>
               </Link>
               <Link href="/all" legacyBehavior>
-                <Menu.Item as="a">Records</Menu.Item>
+                <Menu.Item as="a">Appointments</Menu.Item>
               </Link>
               <Link href="/viewdoctors" legacyBehavior>
                 <Menu.Item as="a">Doctors</Menu.Item>
               </Link>
               <Menu.Item position="right">
-                <Link href="/Records/docs" legacyBehavior>
+                <Link href="/doctors" legacyBehavior>
                   <Button as="a" inverted={!fixed}>
                     Create
                   </Button>
                 </Link>
-                <Link href="/newdoc" legacyBehavior>
-                  <Button
-                    inverted={!fixed}
-                    primary={fixed}
-                    style={{ marginLeft: "0.5em" }}
-                  >
-                    Register Doctor
-                  </Button>
-                </Link>
+                {currentAccount.toLowerCase() === manager.toLowerCase() && (
+                  <Link href="/newdoc" legacyBehavior>
+                    <Button
+                      inverted={!fixed}
+                      primary={fixed}
+                      style={{ marginLeft: "0.5em" }}
+                    >
+                      Register Doctor
+                    </Button>
+                  </Link>
+                )}
               </Menu.Item>
             </Container>
           </Menu>
           <HomepageHeading />
         </Segment>
       </Visibility>
-
       {children}
     </Media>
   );
@@ -133,10 +137,6 @@ DesktopContainer.propTypes = {
 };
 
 const ResponsiveContainer = ({ children }) => (
-  /* Heads up!
-   * For large applications it may not be best option to put all page into these containers at
-   * they will be rendered twice for SSR.
-   */
   <MediaContextProvider>
     <DesktopContainer>{children}</DesktopContainer>
   </MediaContextProvider>

@@ -28,8 +28,15 @@ export default function Doctors() {
 
   return (
     <Layout>
-      <h3>Registered Doctors</h3>
-      <Card.Group itemsPerRow={6} items={items} />
+      {!items.length ? (
+        <div className="w-full mt-10">
+          <h3 className="text-2xl font-bold text-center">
+            This network doesn't have any doctors yet!
+          </h3>
+        </div>
+      ) : (
+        <Card.Group itemsPerRow={6} items={items} />
+      )}
     </Layout>
   );
 }

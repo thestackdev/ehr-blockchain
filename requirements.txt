@@ -1,0 +1,14 @@
+- sort our profile at top
+- Only assigned doctor can view records
+- Add other doctor for same user
+- Categorise reports and prescription
+- test
+    - p1 (Date)
+    - p2 (Date)
+    - p3 (Date)
+    
+- d2
+    - p1 (Date)
+    - p2 (Date)
+    
+- navigation profile page

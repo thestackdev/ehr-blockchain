@@ -1,10 +1,15 @@
 import { create } from "ipfs-http-client";
 import { useRouter } from "next/router";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Form, Message } from "semantic-ui-react";
 import Layout from "../../../components/Layout";
 import { TransactionContext } from "../../../context/Entherum";
-import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from "../../../utils/constants";
+import {
+  IPFS_BASE,
+  IPFS_GATEWAY,
+  IPFS_PORT,
+  IPFS_PROTOCOL,
+} from "../../../utils/constants";
 
 const ipfs = create({
   host: IPFS_BASE,
@@ -14,10 +19,10 @@ const ipfs = create({
 
 export default function AddRecord() {
   const router = useRouter();
-  const {
-    setReportHash,
-    setPrescriptionHash, currentAccount
-  } = useContext(TransactionContext);
+  const { setReportHash, setPrescriptionHash, getMyDoctors, getDoctor } =
+    useContext(TransactionContext);
+
+  const address = router.query.address;
 
   const [state, setState] = useState({
     account: "",
@@ -28,7 +33,9 @@ export default function AddRecord() {
     message: "",
     errorMessage: "",
     visible: true,
+    doctor: null,
   });
+  const [options, setOptions] = useState([]);
 
   const captureReport = (event) => {
     event.preventDefault();
@@ -37,7 +44,6 @@ export default function AddRecord() {
     reader.readAsArrayBuffer(file);
     reader.onloadend = () => {
       setState((e) => ({ ...e, reportBuffer: Buffer(reader.result) }));
-      console.log("buffer", state.reportBuffer);
     };
   };
 
@@ -48,8 +54,21 @@ export default function AddRecord() {
     reader.readAsArrayBuffer(file);
     reader.onloadend = () => {
       setState((e) => ({ ...e, prescriptionBuffer: Buffer(reader.result) }));
-      console.log("buffer", state.prescriptionBuffer);
     };
+  };
+
+  const fetchDoctors = async () => {
+    const doctorsHash = await getMyDoctors(router.query.address);
+    const doctors = [];
+    for (let i = 0; i < doctorsHash.length; i++) {
+      const doctor = await getDoctor(doctorsHash[i]);
+      doctors.push({
+        key: doctor.doc,
+        text: doctor.description,
+        value: doctor.doc,
+      });
+    }
+    setOptions(doctors);
   };
 
   const onSubmit = async (event) => {
@@ -68,27 +87,47 @@ export default function AddRecord() {
         resultPrescription = await ipfs.add(state.prescriptionBuffer);
       if (state.reportBuffer != null)
         resultReport = await ipfs.add(state.reportBuffer);
-      setState((e) => ({ ...e, message: "added your files pushing to blockchain" }));
+      setState((e) => ({
+        ...e,
+        message: "added your files pushing to blockchain",
+      }));
       if (resultPrescription != null) {
         const link = IPFS_GATEWAY + resultPrescription.path;
-        await setPrescriptionHash(router.query.address, link)
+        await setPrescriptionHash(address, link);
       }
       if (resultReport != null) {
         const link = IPFS_GATEWAY + resultReport.path;
-        await
-          setReportHash(router.query.address, link)
+        await setReportHash(address, link);
       }
     } catch (error) {
       setState((e) => ({ ...e, errorMessage: error.message }));
     }
-    setState((e) => ({ ...e, loading: false, message: "succefully done Thank you!!" }));
+    setState((e) => ({
+      ...e,
+      loading: false,
+      message: "succefully done Thank you!!",
+    }));
     router.push(`/records/${router.query.address}`);
   };
 
+  useEffect(() => {
+    if (!address) return;
+    fetchDoctors();
+  }, [router.isReady]);
+
   return (
     <Layout>
-      <h3>add files</h3>
+      <h1 className="font-bold text-2xl mb-6">Add files</h1>
       <Form error={!!state.errorMessage} onSubmit={onSubmit}>
+        {/* <Form.Select
+          label="Doctor"
+          placeholder="Doctor"
+          required
+          options={options}
+          onChange={(event, { value }) => {
+            setState((e) => ({ ...e, doctor: value }));
+          }}
+        /> */}
         <Form.Input
           type="file"
           label="prescription(if any)"
@@ -113,4 +152,3 @@ export default function AddRecord() {
     </Layout>
   );
 }
-

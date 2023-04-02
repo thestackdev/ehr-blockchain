@@ -4,15 +4,18 @@ import React, { useContext, useState } from "react";
 import { Button, Form, Message } from "semantic-ui-react";
 import Layout from "../../components/Layout";
 import { TransactionContext } from "../../context/Entherum";
-import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from "../../utils/constants";
+import {
+  IPFS_BASE,
+  IPFS_GATEWAY,
+  IPFS_PORT,
+  IPFS_PROTOCOL,
+} from "../../utils/constants";
 
 const ipfs = create({
   host: IPFS_BASE,
   port: IPFS_PORT,
-  protocol:
-    IPFS_PROTOCOL,
+  protocol: IPFS_PROTOCOL,
 });
-
 
 const options = [
   { key: "m", text: "Male", value: "male" },
@@ -87,11 +90,8 @@ export default function CreateRecord() {
     try {
       let resultPrescriptionLink = "";
       if (state.bufferPrescription != null) {
-        const resultPrescription = await ipfs.add(
-          state.bufferPrescription
-        );
-        resultPrescriptionLink =
-          IPFS_GATEWAY + resultPrescription.path;
+        const resultPrescription = await ipfs.add(state.bufferPrescription);
+        resultPrescriptionLink = IPFS_GATEWAY + resultPrescription.path;
       }
       let resultReportLink = "";
       if (state.bufferReport != null) {

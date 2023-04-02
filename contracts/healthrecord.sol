@@ -31,15 +31,14 @@ contract RecordFactory {
         string memory mriHash,
         string memory imageHash
     ) public {
-        require(!records[msg.sender], "Record already exists");
         healthrecord newRecord = new healthrecord(
             msg.sender,
+            doctorAddress,
             name,
             age,
             gender,
             height,
             weight,
-            doctorAddress,
             imageHash
         );
         records[msg.sender] = true;
@@ -79,11 +78,21 @@ contract RecordFactory {
 }
 
 contract healthrecord {
-    string[] private prescriptionHash;
-    string[] private reportHash;
+    struct Prescription {
+        string hash;
+        address doctor;
+    }
+
+    struct Report {
+        string hash;
+        address doctor;
+    }
+
+    Prescription[] private prescription;
+    Report[] private report;
+    address[] private doctor;
     string private profileHash;
     address private manager;
-    address private doctor;
     string private name;
     string private age;
     string private gender;
@@ -92,12 +101,12 @@ contract healthrecord {
 
     constructor(
         address owner,
+        address doctorAddress,
         string memory _name,
         string memory _age,
         string memory _gender,
         string memory _height,
         string memory _weight,
-        address doctorAddress,
         string memory _profileHash
     ) {
         manager = owner;
@@ -106,37 +115,22 @@ contract healthrecord {
         gender = _gender;
         height = _height;
         weight = _weight;
-        doctor = doctorAddress;
         profileHash = _profileHash;
+        doctor.push(doctorAddress);
     }
 
-    modifier restricted() {
-        require(msg.sender == manager || msg.sender == doctor, "Unauthorized");
-        _;
+    function setPrescriptionHash(address doc, string memory hash) public {
+        prescription.push(Prescription(hash, doc));
     }
 
-    function setPrescriptionHash(address sender, string memory hash) public {
-        require(
-            sender == doctor,
-            "Only the doctor can add a prescription hash"
-        );
-        prescriptionHash.push(hash);
-    }
-
-    function setreportHash(address sender, string memory hash) public {
-        require(sender == doctor, "Only the doctor can add a report hash");
-        reportHash.push(hash);
+    function setreportHash(address doc, string memory hash) public {
+        report.push(Report(hash, doc));
     }
 
     function getNameandAddress()
         public
         view
-        returns (
-            string memory,
-            string memory,
-            address,
-            address
-        )
+        returns (string memory, string memory, address, address[] memory)
     {
         return (name, profileHash, manager, doctor);
     }
@@ -152,54 +146,32 @@ contract healthrecord {
             string memory
         )
     {
-        require(
-            msg.sender == manager || msg.sender == doctor,
-            "Restricted to manager or doctor only"
-        );
         return (name, age, height, weight, gender);
     }
 
-    function getPrescription(uint256 index)
-        public
-        view
-        restricted
-        returns (string memory)
-    {
-        require(
-            msg.sender == manager || msg.sender == doctor,
-            "Restricted to manager or doctor only"
-        );
-        require(index < prescriptionHash.length, "Invalid index");
-        return prescriptionHash[index];
+    function getPrescription(
+        uint256 index
+    ) public view returns (Prescription memory) {
+        return prescription[index];
     }
 
-    function getPrescriptionLength() public view restricted returns (uint256) {
-        require(
-            msg.sender == manager || msg.sender == doctor,
-            "Restricted to manager or doctor only"
-        );
-        return prescriptionHash.length;
+    function getPrescriptionLength() public view returns (uint256) {
+        return prescription.length;
     }
 
-    function getReport(uint256 index)
-        public
-        view
-        restricted
-        returns (string memory)
-    {
-        require(
-            msg.sender == manager || msg.sender == doctor,
-            "Restricted to manager or doctor only"
-        );
-        require(index < reportHash.length, "Invalid index");
-        return reportHash[index];
+    function getReport(uint256 index) public view returns (Report memory) {
+        return report[index];
     }
 
-    function getReportLength() public view restricted returns (uint256) {
-        require(
-            msg.sender == manager || msg.sender == doctor,
-            "Restricted to manager or doctor only"
-        );
-        return reportHash.length;
+    function getReportLength() public view returns (uint256) {
+        return report.length;
+    }
+
+    function getMyDoctors() public view returns (address[] memory) {
+        return doctor;
+    }
+
+    function addToMyDoctors(address doc) public {
+        doctor.push(doc);
     }
 }

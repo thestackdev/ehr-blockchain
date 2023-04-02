@@ -14,33 +14,37 @@ export default function Records() {
 
   const fetchData = async () => {
     const data = await getAllRecords();
+    const tmpRecords = [];
     for (let i = 0; i < data.length; i++) {
       const recordInstance = await getNameAndAddress(data[i]);
       console.log(recordInstance);
-      setRecords((e) => [
-        ...e,
-        {
-          image: recordInstance[1],
-          header: recordInstance[0],
-          description: recordInstance[2],
-          fluid: true,
-          extra: (
-            <Link href={`/records/${data[i]}`}>
-              <Icon name="user" />
-              View
-            </Link>
-          ),
-        },
-      ]);
+      tmpRecords.push({
+        image: recordInstance[1],
+        header: recordInstance[0],
+        fluid: true,
+        extra: (
+          <Link href={`/records/${data[i]}`}>
+            <Icon name="user" />
+            View
+          </Link>
+        ),
+      });
+
+      setRecords([...tmpRecords]);
     }
   };
 
-  console.log(records.length);
-
   return (
     <Layout>
-      <h1>All records!!</h1>
-      <Card.Group items={records} itemsPerRow={2} />
+      {!records.length ? (
+        <div className="w-full mt-10">
+          <h3 className="text-2xl font-bold text-center">
+            This network doesn't have any records yet!
+          </h3>
+        </div>
+      ) : (
+        <Card.Group items={records} itemsPerRow={6} />
+      )}
     </Layout>
   );
 }

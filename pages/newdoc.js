@@ -4,12 +4,16 @@ import React, { useContext, useState } from "react";
 import { Button, Form, Icon, Message } from "semantic-ui-react";
 import Layout from "../components/Layout";
 import { TransactionContext } from "../context/Entherum";
-import { IPFS_BASE, IPFS_GATEWAY, IPFS_PORT, IPFS_PROTOCOL } from '../utils/constants'
+import {
+  IPFS_BASE,
+  IPFS_GATEWAY,
+  IPFS_PORT,
+  IPFS_PROTOCOL,
+} from "../utils/constants";
 const ipfs = create({
   host: IPFS_BASE,
   port: IPFS_PORT,
-  protocol:
-    IPFS_PROTOCOL,
+  protocol: IPFS_PROTOCOL,
 });
 
 export default function Create() {
@@ -55,18 +59,20 @@ export default function Create() {
 
   if (loading) return <h1>Loading...</h1>;
 
-  console.log(currentAccount, manager);
   if (currentAccount.toLowerCase() !== manager.toLowerCase()) {
+    router.replace("/");
     return (
       <Layout>
-        <h1>Sorry this page can only be accesed by the manager</h1>
+        <h1 className="text-2xl text-center">
+          Sorry this page can only be accesed by the manager
+        </h1>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <h1>Register Doctor</h1>
+      <h1 className="text-2xl font-bold mb-10">Register Doctor</h1>
       <Form onSubmit={onSubmit} error={!!state.errorMessage}>
         <Form.Group widths="equal">
           <Form.Input

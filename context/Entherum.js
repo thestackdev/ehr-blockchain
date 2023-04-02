@@ -104,6 +104,38 @@ export const TransactionsProvider = ({ children }) => {
     setIsLoading(false);
   };
 
+  const getMyDoctors = async (address) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const doctors = await healthRecordContract.getMyDoctors();
+        return doctors;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  const addToMyDoctors = async (address, doctor) => {
+    setIsLoading(true);
+    try {
+      if (ethereum) {
+        const healthRecordContract = createHealthRecordContract(address);
+        const doctors = await healthRecordContract.addToMyDoctors(doctor);
+        return doctors;
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
   const getNameAndAddress = async (address) => {
     setIsLoading(true);
     try {
@@ -205,7 +237,10 @@ export const TransactionsProvider = ({ children }) => {
     try {
       if (ethereum) {
         const healthRecordContract = createHealthRecordContract(address);
-        const details = await healthRecordContract.setPrescriptionHash(currentAccount, hash);
+        const details = await healthRecordContract.setPrescriptionHash(
+          currentAccount,
+          hash
+        );
         await details.wait();
         return details;
       } else {
@@ -217,13 +252,15 @@ export const TransactionsProvider = ({ children }) => {
     setIsLoading(false);
   };
 
-
   const setReportHash = async (address, hash) => {
     setIsLoading(true);
     try {
       if (ethereum) {
         const healthRecordContract = createHealthRecordContract(address);
-        const details = await healthRecordContract.setreportHash(currentAccount, hash);
+        const details = await healthRecordContract.setreportHash(
+          currentAccount,
+          hash
+        );
         return details;
       } else {
         console.log("Ethereum is not present");
@@ -233,7 +270,6 @@ export const TransactionsProvider = ({ children }) => {
     }
     setIsLoading(false);
   };
-
 
   const createRecord = async (data) => {
     setIsLoading(true);
@@ -290,7 +326,7 @@ export const TransactionsProvider = ({ children }) => {
       if (!ethereum) return alert("Please install MetaMask.");
 
       const accounts = await ethereum.request({ method: "eth_accounts" });
-      console.log(accounts);
+
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
       } else {
@@ -347,6 +383,8 @@ export const TransactionsProvider = ({ children }) => {
         getReport,
         setReportHash,
         setPrescriptionHash,
+        getMyDoctors,
+        addToMyDoctors,
       }}
     >
       {children}
